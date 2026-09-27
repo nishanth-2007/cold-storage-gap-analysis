@@ -162,6 +162,15 @@ export default function LoginPage({ defaultRole }) {
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
+  // If user visits login page for the role they are ALREADY logged into, navigate to home page
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    const currentTargetRole = roleParam || defaultRole || 'farmer';
+    if (user && user.role === currentTargetRole) {
+      navigate('/');
+    }
+  }, [roleParam, defaultRole, navigate]);
+
   // Synchronize with URL search params
   useEffect(() => {
     if (roleParam && ROLE_CONFIGS[roleParam]) {
@@ -178,8 +187,16 @@ export default function LoginPage({ defaultRole }) {
     }
   }, [roleParam]);
 
-  // When active role changes internally
+  // When active role changes internally:
+  // If clicking on the same user they are already logged in as, navigate to home page ('/')
+  // Only switch to login view when clicking another user role
   const handleRoleChange = (roleKey) => {
+    const user = authService.getCurrentUser();
+    if (user && user.role === roleKey) {
+      navigate('/');
+      return;
+    }
+
     setActiveRole(roleKey);
     setSearchParams({ role: roleKey });
     setEmail(ROLE_CONFIGS[roleKey].demoUser.email);
