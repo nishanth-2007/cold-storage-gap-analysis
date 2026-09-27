@@ -48,6 +48,10 @@ export const authService = {
   },
 
   async register(userData) {
+    if (userData.role === 'admin' || userData.role === 'planner') {
+      throw new Error(`Self-registration is not permitted for ${userData.role === 'admin' ? 'System Administrator' : 'Government / Planner'} accounts.`);
+    }
+
     const existing = dbStore.findUserByEmail(userData.email);
     if (existing) {
       throw new Error('A user with this email address already exists');
@@ -56,18 +60,42 @@ export const authService = {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(userData.password || 'password123', salt);
 
+    const organization = userData.organization || userData.facilityName || (userData.role === 'farmer' ? `${userData.district || 'AP'} Rythu Sangham` : '');
+
     const newUser = dbStore.createUser({
       name: userData.name,
       email: userData.email,
       passwordHash,
       role: userData.role || 'farmer',
-      organization: userData.organization || '',
+      organization,
       state: 'Andhra Pradesh',
       district: userData.district || 'Guntur',
       mandal: userData.mandal || '',
       village: userData.village || '',
       phone: userData.phone || ''
     });
+
+    // If cold storage owner registered with facility name, create cold storage facility record
+    if (userData.role === 'owner' && userData.facilityName) {
+      dbStore.createColdStorage({
+        facilityName: userData.facilityName,
+        district: userData.district || 'Guntur',
+        mandal: userData.mandal || 'Guntur Urban',
+        location: `${userData.mandal || 'Guntur Urban'}, ${userData.district || 'Guntur'}`,
+        lat: 16.3067,
+        lng: 80.4365,
+        totalCapacityMT: Number(userData.totalCapacityMT) || 5000,
+        availableCapacityMT: Number(userData.totalCapacityMT) || 5000,
+        operatingStatus: "Active",
+        contactPerson: userData.name,
+        contactPhone: userData.phone || "+91 98480 12345",
+        commoditiesSupported: ["Fresh Chilli", "Tomato", "Mango"],
+        temperatureZones: [
+          { name: "Chamber 1 (Multi-Commodity)", tempRange: "2°C to 8°C", capacityMT: Number(userData.totalCapacityMT) || 5000, availableMT: Number(userData.totalCapacityMT) || 5000, suitableCommodities: ["Fresh Chilli", "Tomato", "Mango"] }
+        ],
+        pricingPerMTMonth: 850
+      });
+    }
 
     const token = this.generateToken(newUser);
     const { passwordHash: _, ...userSafe } = newUser;

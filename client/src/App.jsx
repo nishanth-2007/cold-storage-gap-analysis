@@ -11,7 +11,7 @@ import ColdStorageDetailPage from './pages/ColdStorageDetailPage';
 import GapAnalysisPage from './pages/GapAnalysisPage';
 import PotentialLocationsPage from './pages/PotentialLocationsPage';
 import MarketInsightsPage from './pages/MarketInsightsPage';
-import OwnerLoginPage from './pages/OwnerLoginPage';
+import LoginPage from './pages/LoginPage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import PlannerDashboardPage from './pages/PlannerDashboardPage';
 import DataSourcesPage from './pages/DataSourcesPage';
@@ -33,7 +33,8 @@ export default function App() {
             <Route path="/gap-analysis" element={<GapAnalysisPage />} />
             <Route path="/potential-locations" element={<PotentialLocationsPage />} />
             <Route path="/market-insights" element={<MarketInsightsPage />} />
-            <Route path="/owner-login" element={<OwnerLoginPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/owner-login" element={<LoginPage defaultRole="owner" />} />
             <Route path="/owner-dashboard" element={<OwnerDashboardPage />} />
             <Route path="/planner-dashboard" element={<PlannerDashboardPage />} />
             <Route path="/data-sources" element={<DataSourcesPage />} />
