@@ -15,7 +15,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[15.8, 79.9], [16.6, 80.8]],
     areaSqKm: 2443,
     horticultureAcreageHa: 142000,
-    primaryCrops: ["Chilli", "Turmeric", "Banana", "Tomato"],
+    primaryCrops: ["Fresh Chilli", "Turmeric", "Banana", "Tomato"],
     mandals: [
       { name: "Guntur Urban", villages: ["Guntur City", "Nallapadu", "Pedakakani"] },
       { name: "Duggirala", villages: ["Duggirala Village", "Manchenapalli", "Chintalapudi"] },
@@ -33,7 +33,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[15.8, 79.4], [16.7, 80.3]],
     areaSqKm: 7298,
     horticultureAcreageHa: 118000,
-    primaryCrops: ["Chilli", "Tomato", "Lime", "Papaya"],
+    primaryCrops: ["Fresh Chilli", "Tomato", "Lime", "Papaya"],
     mandals: [
       { name: "Narasaraopet", villages: ["Narasaraopet Rural", "Prakash Nagar", "Ravipadu"] },
       { name: "Chilakaluripet", villages: ["Chilakaluripet Town", "Purushothapatnam", "Pasumarru"] },
@@ -50,7 +50,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[15.6, 80.0], [16.2, 80.7]],
     areaSqKm: 3829,
     horticultureAcreageHa: 64000,
-    primaryCrops: ["Banana", "Chilli", "Cashew", "Vegetables"],
+    primaryCrops: ["Banana", "Fresh Chilli", "Cashew", "Vegetables"],
     mandals: [
       { name: "Bapatla", villages: ["Bapatla Rural", "Appikatla", "Karlapalem"] },
       { name: "Chirala", villages: ["Chirala Rural", "Vetapalem", "Karamchedu"] },
@@ -83,7 +83,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[16.3, 80.3], [17.1, 80.9]],
     areaSqKm: 3316,
     horticultureAcreageHa: 104000,
-    primaryCrops: ["Mango", "Chilli", "Tomato", "Papaya"],
+    primaryCrops: ["Mango", "Fresh Chilli", "Tomato", "Papaya"],
     mandals: [
       { name: "Vijayawada Urban", villages: ["Bhavanipuram", "Gunadala", "Gollapudi"] },
       { name: "Vijayawada Rural", villages: ["Nunna", "Enikepadu", "Payakapuram"] },
@@ -187,7 +187,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[15.4, 76.9], [16.2, 78.5]],
     areaSqKm: 7980,
     horticultureAcreageHa: 168000,
-    primaryCrops: ["Onion", "Tomato", "Chilli", "Banana"],
+    primaryCrops: ["Fresh Chilli", "Tomato", "Banana", "Sweet Orange"],
     mandals: [
       { name: "Kurnool Urban", villages: ["Kurnool City", "Gargeyapuram", "Joharapuram"] },
       { name: "Kurnool Rural", villages: ["Nannur", "Ulchala", "Munagalapadu"] },
@@ -205,7 +205,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[14.9, 78.0], [16.0, 79.1]],
     areaSqKm: 9682,
     horticultureAcreageHa: 135000,
-    primaryCrops: ["Onion", "Sweet Orange", "Banana", "Turmeric"],
+    primaryCrops: ["Sweet Orange", "Banana", "Turmeric", "Fresh Chilli"],
     mandals: [
       { name: "Nandyal", villages: ["Nandyal Rural", "Chabolu", "Polur"] },
       { name: "Allagadda", villages: ["Allagadda Town", "Rudravaram", "Chagalamarri"] },
@@ -240,7 +240,7 @@ export const AP_DISTRICTS_DATA = [
     bounds: [[14.9, 79.0], [16.1, 80.4]],
     areaSqKm: 14322,
     horticultureAcreageHa: 132000,
-    primaryCrops: ["Chilli", "Tomato", "Sweet Orange", "Cashew"],
+    primaryCrops: ["Fresh Chilli", "Tomato", "Sweet Orange", "Cashew"],
     mandals: [
       { name: "Ongole", villages: ["Ongole Rural", "Pelluru", "Mukthinuthalapadu"] },
       { name: "Markapur", villages: ["Markapur Town", "Dornala", "Tarlupadu"] },
@@ -447,18 +447,18 @@ export const AP_DISTRICTS_DATA = [
 // Major Horticulture Crops in Andhra Pradesh with perishability and temperature guidelines
 export const AP_HORTICULTURE_CROPS = [
   {
-    name: "Chilli",
-    scientificName: "Capsicum annuum",
-    category: "Spice",
-    tempRange: "0°C to 4°C",
-    minTempC: 0,
-    maxTempC: 4,
-    humidityRange: "65% - 70%",
-    perishabilityDays: 180, // when dried or cold-stored
-    coldStorageRequirementPct: 65, // % of marketable surplus requiring cold storage
-    peakHarvest: ["January", "February", "March", "April"],
+    name: "Fresh Chilli",
+    scientificName: "Capsicum annuum (Fresh Green/Red)",
+    category: "Vegetable",
+    tempRange: "7°C to 10°C",
+    minTempC: 7,
+    maxTempC: 10,
+    humidityRange: "90% - 95%",
+    perishabilityDays: 28,
+    coldStorageRequirementPct: 55,
+    peakHarvest: ["January", "February", "March", "April", "May"],
     majorDistricts: ["Guntur", "Palnadu", "Prakasam", "Kurnool", "NTR"],
-    avgYieldMTPerHa: 4.8
+    avgYieldMTPerHa: 12.5
   },
   {
     name: "Tomato",
@@ -529,20 +529,6 @@ export const AP_HORTICULTURE_CROPS = [
     peakHarvest: ["February", "March", "April"],
     majorDistricts: ["Guntur", "YSR Kadapa", "Nandyal", "Alluri Sitharama Raju"],
     avgYieldMTPerHa: 6.2
-  },
-  {
-    name: "Onion",
-    scientificName: "Allium cepa",
-    category: "Vegetable",
-    tempRange: "0°C to 2°C",
-    minTempC: 0,
-    maxTempC: 2,
-    humidityRange: "65% - 70%",
-    perishabilityDays: 120,
-    coldStorageRequirementPct: 50,
-    peakHarvest: ["October", "November", "December", "March"],
-    majorDistricts: ["Kurnool", "Nandyal", "Ananthapuramu"],
-    avgYieldMTPerHa: 18.0
   },
   {
     name: "Papaya",

@@ -38,7 +38,7 @@ export default function Navbar() {
         email: "farmer@ap.gov.in",
         role: "farmer",
         district: "Guntur",
-        organization: "Guntur Chilli Rythu Mithra FPO"
+        organization: "Guntur Fresh Chilli Rythu Mithra FPO"
       };
       setCurrentUser(defaultUser);
       localStorage.setItem('ap_user', JSON.stringify(defaultUser));
@@ -53,7 +53,7 @@ export default function Navbar() {
         email: "farmer@ap.gov.in",
         role: "farmer",
         district: "Guntur",
-        organization: "Guntur Chilli Rythu Mithra FPO"
+        organization: "Guntur Fresh Chilli Rythu Mithra FPO"
       };
     } else if (newRole === 'owner') {
       mockUser = {

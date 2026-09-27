@@ -20,7 +20,7 @@ export default function MarketInsightsPage() {
   const [loading, setLoading] = useState(true);
 
   // ROI Calculator State
-  const [calcCrop, setCalcCrop] = useState('Chilli');
+  const [calcCrop, setCalcCrop] = useState('Fresh Chilli');
   const [calcQuantity, setCalcQuantity] = useState(15);
   const [calcMonths, setCalcMonths] = useState(4);
   const [calcRent, setCalcRent] = useState(850);
@@ -189,10 +189,9 @@ export default function MarketInsightsPage() {
                   onChange={(e) => setCalcCrop(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500"
                 >
-                  <option value="Chilli">Chilli (Guntur Teja)</option>
+                  <option value="Fresh Chilli">Fresh Chilli (Guntur Teja)</option>
                   <option value="Tomato">Tomato (Madanapalle Hybrid)</option>
                   <option value="Mango">Mango (Banganapalle)</option>
-                  <option value="Onion">Onion (Bellary Red)</option>
                   <option value="Banana">Banana (Grand Naine)</option>
                 </select>
               </div>

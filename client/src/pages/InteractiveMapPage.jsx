@@ -373,13 +373,12 @@ export default function InteractiveMapPage() {
               className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-medium text-xs focus:ring-2 focus:ring-emerald-500"
             >
               <option value="ALL">All Commodities</option>
-              <option value="Chilli">Chilli (Mirchi)</option>
+              <option value="Fresh Chilli">Fresh Chilli</option>
               <option value="Tomato">Tomato</option>
               <option value="Mango">Mango</option>
               <option value="Banana">Banana</option>
               <option value="Sweet Orange">Sweet Orange</option>
               <option value="Turmeric">Turmeric</option>
-              <option value="Onion">Onion</option>
             </select>
           </div>
         </div>

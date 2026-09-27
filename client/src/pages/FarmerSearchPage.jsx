@@ -34,7 +34,7 @@ export default function FarmerSearchPage() {
   const [selectedVillage, setSelectedVillage] = useState('');
   
   const [crops, setCrops] = useState([]);
-  const [selectedCrop, setSelectedCrop] = useState('Chilli');
+  const [selectedCrop, setSelectedCrop] = useState('Fresh Chilli');
   const [quantityMT, setQuantityMT] = useState(15);
   const [durationMonths, setDurationMonths] = useState(3);
   

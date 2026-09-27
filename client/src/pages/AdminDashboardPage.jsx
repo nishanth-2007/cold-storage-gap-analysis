@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
     totalCapacityMT: 5000,
     availableCapacityMT: 2000,
     pricingPerMTMonth: 800,
-    commoditiesSupported: 'Chilli, Tomato, Mango',
+    commoditiesSupported: 'Fresh Chilli, Tomato, Mango',
     contactPerson: '',
     contactPhone: ''
   });
@@ -368,7 +368,7 @@ export default function AdminDashboardPage() {
                   value={newFacility.commoditiesSupported}
                   onChange={(e) => setNewFacility({ ...newFacility, commoditiesSupported: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
-                  placeholder="Chilli, Tomato, Mango, Turmeric"
+                  placeholder="Fresh Chilli, Tomato, Mango, Turmeric"
                 />
               </div>
 

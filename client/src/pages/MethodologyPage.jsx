@@ -49,7 +49,7 @@ export default function MethodologyPage() {
           </div>
           <div className="space-y-1 text-xs text-slate-600">
             <p><strong>MS% (Marketable Surplus):</strong> 80% to 92% of gross yield after farm retention.</p>
-            <p><strong>RF% (Cold Storage Requirement Factor):</strong> 30% for bananas up to 65% for dry red chillies.</p>
+            <p><strong>RF% (Cold Storage Requirement Factor):</strong> 30% for bananas up to 60% for fresh chillies.</p>
             <p><strong>Df (Seasonal Duration Factor):</strong> Harvest concentration peak index.</p>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function MethodologyPage() {
             </span>
             <p className="text-xl font-bold text-red-700">&gt; 95% Gap</p>
             <p className="text-xs text-red-900 leading-relaxed">
-              Acute lack of facilities causing severe farm-gate distress sales. E.g. Annamayya tomato belt (98.7% deficit) & Kurnool onion belt (96.8% deficit).
+              Acute lack of facilities causing severe farm-gate distress sales. E.g. Annamayya tomato belt (98.7% deficit) & Western Kurnool horticulture belt (96.8% deficit).
             </p>
           </div>
 
@@ -111,7 +111,7 @@ export default function MethodologyPage() {
             </span>
             <p className="text-xl font-bold text-yellow-700">30% - 80% Gap</p>
             <p className="text-xs text-yellow-900 leading-relaxed">
-              Substantial existing facilities but requiring modern multi-commodity expansion. E.g. Guntur chilli corridor (38.9% gap) and NTR mango belt.
+              Substantial existing facilities but requiring modern multi-commodity expansion. E.g. Guntur fresh chilli corridor (38.9% gap) and NTR mango belt.
             </p>
           </div>
 
@@ -138,12 +138,12 @@ export default function MethodologyPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
           {[
-            { crop: 'Chilli (Dry/Cold)', temp: '0°C to 4°C', rh: '65% - 70%', days: '180 days', dist: 'Guntur, Palnadu' },
+            { crop: 'Fresh Chilli (Green/Ripened)', temp: '7°C to 10°C', rh: '90% - 95%', days: '28 days', dist: 'Guntur, Palnadu, Kurnool' },
             { crop: 'Tomato (Fresh)', temp: '10°C to 13°C', rh: '85% - 90%', days: '14 days', dist: 'Annamayya, Kurnool' },
             { crop: 'Mango (Benishan)', temp: '10°C to 13°C', rh: '85% - 90%', days: '28 days', dist: 'Krishna, NTR, Chittoor' },
             { crop: 'Banana (Grand Naine)', temp: '13°C to 15°C', rh: '90% - 95%', days: '21 days', dist: 'YSR Kadapa, Anantapur' },
             { crop: 'Sweet Orange (Mosambi)', temp: '5°C to 8°C', rh: '85% - 90%', days: '60 days', dist: 'Ananthapuramu, Nandyal' },
-            { crop: 'Onion (Rabi/Kharif)', temp: '0°C to 2°C', rh: '65% - 70%', days: '120 days', dist: 'Kurnool, Nandyal' }
+            { crop: 'Turmeric (Raw Rhizome)', temp: '10°C to 12°C', rh: '85% - 90%', days: '90 days', dist: 'Duggirala, Guntur' }
           ].map(c => (
             <div key={c.crop} className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
               <span className="font-bold text-slate-900 block text-sm">{c.crop}</span>
