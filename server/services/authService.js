@@ -84,6 +84,7 @@ export const authService = {
         location: `${userData.mandal || 'Guntur Urban'}, ${userData.district || 'Guntur'}`,
         lat: 16.3067,
         lng: 80.4365,
+        coordinates: { lat: 16.3067, lng: 80.4365 },
         totalCapacityMT: Number(userData.totalCapacityMT) || 5000,
         availableCapacityMT: Number(userData.totalCapacityMT) || 5000,
         operatingStatus: "Active",

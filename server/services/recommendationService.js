@@ -14,7 +14,8 @@ export const recommendationService = {
 
     const scoredFacilities = allStorages.map(cs => {
       // Calculate road distance in km
-      const distanceKm = gisService.calculateDistance(farmerCoords, cs.coordinates);
+      const storageCoords = cs.coordinates || (cs.lat && cs.lng ? { lat: cs.lat, lng: cs.lng } : null) || gisService.getCoordinatesForLocation(cs.district, cs.mandal);
+      const distanceKm = gisService.calculateDistance(farmerCoords, storageCoords);
 
       // Check crop compatibility
       let isCropDirectMatch = false;

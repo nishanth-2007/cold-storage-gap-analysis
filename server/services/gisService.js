@@ -76,7 +76,12 @@ export const gisService = {
   },
 
   calculateDistance(coord1, coord2) {
-    return calculateHaversineDistanceKm(coord1.lat, coord1.lng, coord2.lat, coord2.lng);
+    if (!coord1 || !coord2) return 25;
+    const lat1 = coord1.lat !== undefined ? coord1.lat : (coord1.latitude || 16.0);
+    const lng1 = coord1.lng !== undefined ? coord1.lng : (coord1.longitude || 80.0);
+    const lat2 = coord2.lat !== undefined ? coord2.lat : (coord2.latitude || 16.0);
+    const lng2 = coord2.lng !== undefined ? coord2.lng : (coord2.longitude || 80.0);
+    return calculateHaversineDistanceKm(lat1, lng1, lat2, lng2);
   }
 };
 
