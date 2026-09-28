@@ -22,10 +22,12 @@ import DataSourcesPage from './pages/DataSourcesPage';
 import MethodologyPage from './pages/MethodologyPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import PageTitleTracker from './components/PageTitleTracker';
 
 export default function App() {
   return (
     <Router>
+      <PageTitleTracker />
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-emerald-200">
         <Navbar />
         

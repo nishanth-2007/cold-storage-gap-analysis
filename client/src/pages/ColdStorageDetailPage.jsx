@@ -57,6 +57,13 @@ export default function ColdStorageDetailPage() {
     loadFacility();
   }, [id]);
 
+  useEffect(() => {
+    if (facility && facility.name) {
+      const locStr = facility.district ? ` (${facility.district})` : '';
+      document.title = `${facility.name}${locStr} | AP Cold Storage Registry`;
+    }
+  }, [facility]);
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setBookingLoading(true);
