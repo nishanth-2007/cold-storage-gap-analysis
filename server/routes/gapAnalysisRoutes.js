@@ -1,7 +1,14 @@
 import express from 'express';
 import gapAnalysisService from '../services/gapAnalysisService.js';
+import { requireAuth, requireRole } from '../middleware/authMiddleware.js';
+import { ROLES } from '../config/roles.js';
 
 const router = express.Router();
+
+// Strict Role Authorization (Section 25: Allowed for Owner, Planner, Admin)
+// Rejects unauthorized roles (e.g. Farmer) with HTTP 403
+router.use(requireAuth);
+router.use(requireRole(ROLES.OWNER, ROLES.PLANNER, ROLES.ADMIN));
 
 router.get('/', async (req, res) => {
   try {

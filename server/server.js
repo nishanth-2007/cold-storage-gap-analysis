@@ -1,7 +1,13 @@
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { initDatabase, dbStore } from './db/dbStore.js';
+import { requireAuth, requireRole } from './middleware/authMiddleware.js';
+import { ROLES } from './config/roles.js';
+import inventoryService from './services/inventoryService.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -14,6 +20,7 @@ import marketRoutes from './routes/marketRoutes.js';
 import gisRoutes from './routes/gisRoutes.js';
 import dataSourceRoutes from './routes/dataSourceRoutes.js';
 import farmerRequestRoutes from './routes/farmerRequestRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -40,6 +47,59 @@ app.use('/api/markets', marketRoutes);
 app.use('/api/gis', gisRoutes);
 app.use('/api/data-sources', dataSourceRoutes);
 app.use('/api/farmer-requests', farmerRequestRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Explicit Specification Endpoints (Section 25 & Section 31)
+// 1. POST /api/government-data/import (Allowed: Admin only; Rejects with HTTP 403)
+app.post('/api/government-data/import', requireAuth, requireRole(ROLES.ADMIN), (req, res) => {
+  try {
+    const { datasetType, records } = req.body;
+    if (!datasetType || !Array.isArray(records)) {
+      return res.status(400).json({ error: 'datasetType and records array are required' });
+    }
+    const result = dbStore.importDataset(datasetType, records, req.user);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 2. POST /api/owner/inventory (Allowed: Owner, Admin; Rejects with HTTP 403)
+app.post('/api/owner/inventory', requireAuth, requireRole(ROLES.OWNER, ROLES.ADMIN), async (req, res) => {
+  try {
+    const { facilityId, chambers = [] } = req.body;
+    if (!facilityId) {
+      return res.status(400).json({ error: 'facilityId is required to update inventory' });
+    }
+    const updated = await inventoryService.updateChamberInventory(facilityId, chambers);
+    res.json({ message: 'Chamber inventory updated successfully', facility: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 3. POST /api/storage-request (Allowed: Farmer, Admin; Rejects with HTTP 403)
+app.post('/api/storage-request', requireAuth, requireRole(ROLES.FARMER, ROLES.ADMIN), (req, res) => {
+  try {
+    const created = dbStore.createFarmerRequest({
+      ...req.body,
+      quantityMT: Number(req.body.quantityMT) || 10
+    }, req.user);
+    res.status(201).json({ message: 'Storage reservation recorded', request: created });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 4. Direct URL Rejections (Section 31 tests: /admin/users, /admin/data-import)
+app.all('/admin/users', requireAuth, requireRole(ROLES.ADMIN), (req, res) => {
+  const users = dbStore.getUsers().map(({ passwordHash, ...safeUser }) => safeUser);
+  res.json(users);
+});
+
+app.all(['/admin/data-import', '/api/admin/data-import'], requireAuth, requireRole(ROLES.ADMIN), (req, res) => {
+  res.json({ message: 'Authorized access to admin data import' });
+});
 
 // Health check and system diagnostic
 app.get('/api/health', (req, res) => {
@@ -74,6 +134,21 @@ app.use((err, req, res, next) => {
     message: err.message
   });
 });
+
+// Production SPA Static Serving & Deep Route Fallback (e.g. /admin-login, /map, etc.)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDist = path.resolve(__dirname, '../client/dist');
+
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(clientDist, 'index.html'));
+    }
+    next();
+  });
+}
 
 // Start server
 async function startServer() {

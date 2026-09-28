@@ -36,6 +36,11 @@ export default function FarmerSearchPage() {
   const [crops, setCrops] = useState([]);
   const [selectedCrop, setSelectedCrop] = useState('Fresh Chilli');
   const [quantityMT, setQuantityMT] = useState(15);
+  const [expectedHarvestDate, setExpectedHarvestDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
   const [durationMonths, setDurationMonths] = useState(3);
   
   const [loading, setLoading] = useState(false);
@@ -289,12 +294,12 @@ export default function FarmerSearchPage() {
             </div>
           </div>
 
-          {/* Commodity & Volume Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
-            {/* Crop */}
+          {/* Commodity, Volume, Harvest Date & Duration Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
+            {/* 1. Crop */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Horticulture Crop <span className="text-red-500">*</span>
+                5. Horticulture Crop <span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedCrop}
@@ -309,10 +314,10 @@ export default function FarmerSearchPage() {
               </select>
             </div>
 
-            {/* Quantity MT */}
+            {/* 2. Quantity MT */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Quantity to Store (Metric Tonnes)
+                6. Quantity (MT) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -324,20 +329,33 @@ export default function FarmerSearchPage() {
               />
             </div>
 
-            {/* Storage Duration */}
+            {/* 3. Expected Harvest Date */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Target Duration (Months)
+                7. Expected Harvest Date
+              </label>
+              <input
+                type="date"
+                value={expectedHarvestDate}
+                onChange={(e) => setExpectedHarvestDate(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+              />
+            </div>
+
+            {/* 4. Storage Duration */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                8. Storage Duration
               </label>
               <select
                 value={durationMonths}
                 onChange={(e) => setDurationMonths(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
               >
-                <option value="1">1 Month (Immediate buffer)</option>
-                <option value="3">3 Months (Standard seasonal)</option>
-                <option value="6">6 Months (Off-season realization)</option>
-                <option value="9">9 Months (Long-term preservation)</option>
+                <option value="1">1 Month (Buffer)</option>
+                <option value="3">3 Months (Standard)</option>
+                <option value="6">6 Months (Off-season)</option>
+                <option value="9">9 Months (Extended)</option>
               </select>
             </div>
           </div>
@@ -391,19 +409,31 @@ export default function FarmerSearchPage() {
         )}
 
         {!loading && results && results.recommendations.length === 0 && (
-          <div className="p-10 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
-            <Warehouse className="w-10 h-10 text-slate-300 mx-auto" />
-            <h3 className="text-base font-bold text-slate-800">No Facilities with Available Capacity Found Nearby</h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              No cold storage within 180 km currently has {quantityMT} MT available for {selectedCrop}.
-              Check our Potential Locations page to see if this area qualifies for new infrastructure development!
-            </p>
-            <Link
-              to="/potential-locations"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline pt-2"
-            >
-              View Infrastructure Deficit Hotspots <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+          <div className="p-8 sm:p-10 text-center bg-white rounded-3xl border border-slate-200 space-y-4 max-w-xl mx-auto shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200">
+              <Warehouse className="w-7 h-7" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-base sm:text-lg font-bold text-slate-800">
+                No suitable nearby storage currently found.
+              </h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                Your area may have limited nearby storage capacity for {selectedCrop} ({quantityMT} MT).
+              </p>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setQuantityMT(5);
+                  handleSearch();
+                }}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <Search className="w-3.5 h-3.5" />
+                Explore Storage Availability
+              </button>
+            </div>
           </div>
         )}
 
@@ -533,17 +563,17 @@ export default function FarmerSearchPage() {
                     <div className="space-y-2 pt-2">
                       <button
                         onClick={() => handleOpenBooking(storage)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm transition-all text-center flex items-center justify-center gap-1.5"
+                        className="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Warehouse className="w-3.5 h-3.5" />
-                        Book / Inquire Space
+                        Request Storage
                       </button>
 
                       <Link
                         to={`/cold-storage/${storage.id}`}
                         className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-all text-center block"
                       >
-                        View Full Facility Details
+                        View Details
                       </Link>
                     </div>
                   </div>

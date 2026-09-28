@@ -7,6 +7,9 @@ export const coldStorageService = {
     if (filters.mandal) params.append('mandal', filters.mandal);
     if (filters.crop) params.append('crop', filters.crop);
     if (filters.minAvailableCapacity) params.append('minAvailableCapacity', filters.minAvailableCapacity);
+    if (filters.ownerId) params.append('ownerId', filters.ownerId);
+    if (filters.includePending) params.append('includePending', filters.includePending);
+    if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
 
     const query = params.toString() ? `?${params.toString()}` : '';
     return fetchApi(`/cold-storages${query}`);
@@ -28,6 +31,29 @@ export const coldStorageService = {
       method: 'POST',
       body: JSON.stringify(data)
     });
+  },
+
+  async deleteColdStorage(id) {
+    return fetchApi(`/cold-storages/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async approveColdStorage(id) {
+    return fetchApi(`/admin/facilities/${id}/approve`, {
+      method: 'POST'
+    });
+  },
+
+  async rejectColdStorage(id, reason = '') {
+    return fetchApi(`/admin/facilities/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    });
+  },
+
+  async getPendingFacilities() {
+    return fetchApi('/admin/pending-facilities');
   }
 };
 

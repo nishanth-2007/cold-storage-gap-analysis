@@ -23,6 +23,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import authService from '../services/authService';
+import { getNavigationForRole } from '../config/navigation';
 
 export default function Navbar() {
   const location = useLocation();
@@ -80,16 +81,8 @@ export default function Navbar() {
     navigate('/'); // Always land on home page upon logging out
   };
 
-  const navLinks = [
-    { to: '/', label: 'Home', icon: Warehouse },
-    { to: '/farmer-search', label: 'Find Storage', icon: Search },
-    { to: '/map', label: 'Gap Map', icon: Map },
-    { to: '/gap-analysis', label: 'Gap Analysis', icon: BarChart3 },
-    { to: '/potential-locations', label: 'New Locations', icon: MapPin },
-    { to: '/market-insights', label: 'Market ROI', icon: TrendingUp },
-    { to: '/data-sources', label: 'Data Sources', icon: Database },
-    { to: '/methodology', label: 'Methodology', icon: BookOpen },
-  ];
+  // Dynamically configured role-based navigation (Sections 1, 2, 8, 15, 21, 24, 28)
+  const navLinks = getNavigationForRole(currentUser?.role);
 
   const getRoleBadgeStyle = (role) => {
     switch (role) {
@@ -131,49 +124,47 @@ export default function Navbar() {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 gap-3 min-w-0">
           {/* Logo & Platform Name */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-700 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <Warehouse className="w-5 h-5" />
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-max">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-700 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform shrink-0">
+              <Warehouse className="w-5 h-5 shrink-0" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-tight">
-                  Cold Storage Gap Mapping
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  AP GIS
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">Horticulture Produce Logistics</p>
+            <div className="shrink-0 flex flex-col justify-center">
+              <span className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none whitespace-nowrap">
+                Cold Storage Gap Mapping
+              </span>
+              <p className="text-[11px] text-slate-500 font-medium whitespace-nowrap mt-1">
+                Horticulture Produce Logistics
+              </p>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1 overflow-x-auto no-scrollbar min-w-0 px-2 flex-1 justify-center">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = location.pathname === link.to;
+              const currentFullPath = location.pathname + location.search;
+              const isActive = currentFullPath === link.to || (link.to === '/admin-dashboard' && currentFullPath === '/admin-dashboard');
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                     isActive
-                      ? 'bg-emerald-50 text-emerald-700 shadow-xs'
+                      ? 'bg-emerald-50 text-emerald-700 shadow-xs font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
-                  {link.label}
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                  <span>{link.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           {/* Right Action: Login Button (when logged out) OR Role Switcher & Portal (when logged in) */}
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-2.5 shrink-0">
             {!currentUser ? (
               <div className="relative">
                 <button
@@ -196,8 +187,7 @@ export default function Navbar() {
                       {[
                         { role: 'farmer', label: 'Farmer / FPO', desc: 'Find storage, check mandi rates', icon: Sprout, color: 'text-emerald-700 bg-emerald-50' },
                         { role: 'owner', label: 'Cold Storage Owner', desc: 'Update live chamber capacity', icon: Warehouse, color: 'text-blue-700 bg-blue-50' },
-                        { role: 'planner', label: 'Govt. / Planner', desc: 'Statewide gap analytics', icon: BarChart3, color: 'text-purple-700 bg-purple-50' },
-                        { role: 'admin', label: 'System Admin', desc: 'Manage facilities & records', icon: ShieldCheck, color: 'text-rose-700 bg-rose-50' },
+                        { role: 'planner', label: 'Govt. / Planner', desc: 'Statewide gap analytics', icon: BarChart3, color: 'text-purple-700 bg-purple-50' }
                       ].map((item) => {
                         const Icon = item.icon;
                         return (
@@ -235,17 +225,26 @@ export default function Navbar() {
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${getRoleBadgeStyle(
                       currentUser?.role
                     )}`}
+                    title="Demo Role Switcher (Backend authorization active)"
                   >
                     <User className="w-3.5 h-3.5" />
                     <span>Role: <strong className="font-semibold">{getRoleLabel(currentUser?.role)}</strong></span>
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-slate-200/80 text-slate-700 font-bold hidden xl:inline">
+                      Demo Switcher
+                    </span>
                     <ChevronDown className="w-3 h-3 opacity-60" />
                   </button>
 
                   {roleDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                       <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Session</p>
-                        <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">{currentUser?.name}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Demo Role Switcher</p>
+                          <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                            Auth Verified
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-800 mt-1 truncate">{currentUser?.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{currentUser?.organization || currentUser?.email}</p>
                       </div>
 
@@ -258,7 +257,7 @@ export default function Navbar() {
                           { role: 'farmer', label: 'Farmer / FPO', desc: 'Find storage, check mandi rates' },
                           { role: 'owner', label: 'Cold Storage Owner', desc: 'Update live chamber capacity' },
                           { role: 'planner', label: 'Govt. / Planner', desc: 'Statewide gap analytics' },
-                          { role: 'admin', label: 'System Admin', desc: 'Manage facilities & records' },
+                          ...(currentUser?.role === 'admin' ? [{ role: 'admin', label: 'System Admin', desc: 'Manage facilities & records' }] : [])
                         ].map((item) => {
                           const isCurrent = currentUser?.role === item.role;
                           return (
@@ -340,10 +339,10 @@ export default function Navbar() {
                 )}
                 {currentUser?.role === 'farmer' && (
                   <Link
-                    to="/farmer-search"
+                    to="/farmer-dashboard"
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 shadow-xs"
                   >
-                    Find Storage
+                    Farmer Desk
                   </Link>
                 )}
               </>
@@ -374,8 +373,7 @@ export default function Navbar() {
                 {[
                   { role: 'farmer', label: 'Farmer / FPO' },
                   { role: 'owner', label: 'Cold Storage Owner' },
-                  { role: 'planner', label: 'Govt. / Planner' },
-                  { role: 'admin', label: 'System Admin' }
+                  { role: 'planner', label: 'Govt. / Planner' }
                 ].map((item) => (
                   <button
                     key={item.role}
@@ -410,7 +408,7 @@ export default function Navbar() {
                 Switch Persona
               </p>
               <div className="grid grid-cols-2 gap-1.5">
-                {['farmer', 'owner', 'planner', 'admin'].map((role) => {
+                {['farmer', 'owner', 'planner', ...(currentUser?.role === 'admin' ? ['admin'] : [])].map((role) => {
                   const isCurrent = currentUser?.role === role;
                   return (
                     <button

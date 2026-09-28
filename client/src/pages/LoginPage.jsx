@@ -100,25 +100,6 @@ const ROLE_CONFIGS = {
     },
     defaultRedirect: '/planner-dashboard',
     allowSignUp: false // User rule: Do not add sign up for Govt
-  },
-  admin: {
-    key: 'admin',
-    label: 'System Admin',
-    badge: 'Central GIS Administration',
-    title: 'System Administrator Console',
-    subtitle: 'Manage cold storage facilities, audit verified capacities, and update district GIS boundary datasets.',
-    icon: ShieldCheck,
-    themeColor: 'rose',
-    bannerBg: 'bg-rose-500/10 border-rose-500/20 text-rose-800',
-    accentBtn: 'bg-rose-600 hover:bg-rose-700 text-white',
-    demoUser: {
-      email: 'admin@ap.gov.in',
-      name: 'System Administrator',
-      org: 'AP AgTech GIS Data Management Center',
-      district: 'Guntur'
-    },
-    defaultRedirect: '/admin-dashboard',
-    allowSignUp: false // User rule: Do not add sign up for Admin
   }
 };
 
@@ -173,6 +154,11 @@ export default function LoginPage({ defaultRole }) {
 
   // Synchronize with URL search params
   useEffect(() => {
+    if (roleParam === 'admin') {
+      navigate('/admin-login', { replace: true });
+      return;
+    }
+
     if (roleParam && ROLE_CONFIGS[roleParam]) {
       setActiveRole(roleParam);
       // Pre-fill demo email for convenience
@@ -180,12 +166,12 @@ export default function LoginPage({ defaultRole }) {
       setPassword('password123');
       setError(null);
       setSuccessMsg(null);
-      // If switched to admin or planner, force login mode since signup is disabled
+      // If switched to planner, force login mode since signup is disabled
       if (!ROLE_CONFIGS[roleParam].allowSignUp) {
         setAuthMode('login');
       }
     }
-  }, [roleParam]);
+  }, [roleParam, navigate]);
 
   // When active role changes internally:
   // If clicking on the same user they are already logged in as, navigate to home page ('/')

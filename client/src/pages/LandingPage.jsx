@@ -15,14 +15,30 @@ import {
   Sparkles,
   Users,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ClipboardList,
+  Sprout,
+  Sliders,
+  History
 } from 'lucide-react';
 import { fetchApi } from '../services/api';
+import authService from '../services/authService';
 import DataBadge from '../components/DataBadge';
 
 export default function LandingPage() {
   const [healthData, setHealthData] = useState(null);
+  const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const handleAuth = () => setCurrentUser(authService.getCurrentUser());
+    window.addEventListener('authChange', handleAuth);
+    window.addEventListener('storage', handleAuth);
+    return () => {
+      window.removeEventListener('authChange', handleAuth);
+      window.removeEventListener('storage', handleAuth);
+    };
+  }, []);
 
   useEffect(() => {
     async function loadStats() {
@@ -75,31 +91,186 @@ export default function LandingPage() {
             Find nearby cold-storage capacity, identify infrastructure gaps, and discover potential areas for new cold-storage infrastructure.
           </p>
 
-          {/* Primary Action Buttons Required */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-            <Link
-              to="/farmer-search"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-102"
-            >
-              <Search className="w-4 h-4" />
-              Find Cold Storage
-            </Link>
+          {/* Role-Specific Primary Actions (Section 1, 2, 8, 15, 21) */}
+          <div className="pt-4">
+            {currentUser?.role === 'farmer' ? (
+              <div className="p-5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 backdrop-blur-md max-w-2xl mx-auto space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-emerald-300 font-semibold">
+                    Active Session: <strong className="text-white">{currentUser.name} (Farmer / FPO)</strong>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-600/80 text-white font-bold">
+                    {currentUser.district} Dist
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/farmer-search"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <Search className="w-4 h-4" />
+                    Find Cold Storage
+                  </Link>
+                  <Link
+                    to="/farmer-requests"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <ClipboardList className="w-4 h-4 text-emerald-300" />
+                    My Requests
+                  </Link>
+                  <Link
+                    to="/market-insights"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <TrendingUp className="w-4 h-4 text-emerald-300" />
+                    Market Rates
+                  </Link>
+                  <Link
+                    to="/farmer-dashboard"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <Sprout className="w-4 h-4" />
+                    Farmer Desk
+                  </Link>
+                </div>
+              </div>
+            ) : currentUser?.role === 'owner' ? (
+              <div className="p-5 rounded-2xl bg-blue-950/60 border border-blue-500/40 backdrop-blur-md max-w-2xl mx-auto space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-blue-200 font-semibold">
+                    Active Session: <strong className="text-white">{currentUser.name} (Storage Owner)</strong>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-600/80 text-white font-bold">
+                    {currentUser.district} Dist
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/owner-dashboard"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <Warehouse className="w-4 h-4" />
+                    Owner Dashboard
+                  </Link>
+                  <Link
+                    to="/map"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <Map className="w-4 h-4" />
+                    Explore Gap Map
+                  </Link>
+                  <Link
+                    to="/owner-dashboard?tab=capacity"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <Sliders className="w-4 h-4 text-blue-300" />
+                    Update Live Capacity
+                  </Link>
+                  <Link
+                    to="/owner-dashboard?tab=demand"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <BarChart3 className="w-4 h-4 text-blue-300" />
+                    Nearby Demand
+                  </Link>
+                </div>
+              </div>
+            ) : currentUser?.role === 'planner' ? (
+              <div className="p-5 rounded-2xl bg-purple-950/60 border border-purple-500/40 backdrop-blur-md max-w-2xl mx-auto space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-purple-200 font-semibold">
+                    Active Session: <strong className="text-white">{currentUser.name} (Govt. Planner)</strong>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-purple-600/80 text-white font-bold">
+                    Statewide Planning Desk
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/planner-dashboard"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    Planner Dashboard
+                  </Link>
+                  <Link
+                    to="/map"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <Map className="w-4 h-4 text-purple-300" />
+                    Gap Map
+                  </Link>
+                  <Link
+                    to="/potential-locations"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all hover:scale-102"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    New Locations
+                  </Link>
+                </div>
+              </div>
+            ) : currentUser?.role === 'admin' ? (
+              <div className="p-5 rounded-2xl bg-rose-950/60 border border-rose-500/40 backdrop-blur-md max-w-2xl mx-auto space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-rose-200 font-semibold">
+                    Active Session: <strong className="text-white">{currentUser.name} (Administrator)</strong>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-rose-600/80 text-white font-bold">
+                    Full Platform Access
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/admin-dashboard"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-102"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    Admin Desk
+                  </Link>
+                  <Link
+                    to="/admin-dashboard?tab=users"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <Users className="w-4 h-4 text-rose-300" />
+                    User Accounts
+                  </Link>
+                  <Link
+                    to="/admin-dashboard?tab=audit"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/20 transition-all hover:scale-102"
+                  >
+                    <History className="w-4 h-4 text-rose-300" />
+                    Audit Logs
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              /* Public / Logged Out Visitor Actions */
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  to="/farmer-search"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-102"
+                >
+                  <Search className="w-4 h-4" />
+                  Find Cold Storage
+                </Link>
 
-            <Link
-              to="/map"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-lg shadow-sky-600/30 transition-all hover:scale-102"
-            >
-              <Map className="w-4 h-4" />
-              Explore Gap Map
-            </Link>
+                <Link
+                  to="/map"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-lg shadow-sky-600/30 transition-all hover:scale-102"
+                >
+                  <Map className="w-4 h-4" />
+                  Explore Storage Grid
+                </Link>
 
-            <Link
-              to="/potential-locations"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/30 transition-all hover:scale-102"
-            >
-              <MapPin className="w-4 h-4" />
-              Find Potential New Storage Location
-            </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-600 shadow-md transition-all hover:scale-102"
+                >
+                  <Users className="w-4 h-4 text-emerald-400" />
+                  Login to Portal
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Live Data Badge */}
@@ -107,7 +278,6 @@ export default function LandingPage() {
             <DataBadge
               source="Directorate of Horticulture & AP State Warehouse Registry"
               sourceType="Government"
-              sourceLastUpdated="2026-09-27"
               className="text-slate-300 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700"
             />
           </div>

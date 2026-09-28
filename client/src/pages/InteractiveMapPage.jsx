@@ -22,6 +22,7 @@ import { gapAnalysisService } from '../services/gapAnalysisService';
 import { newStorageLocationService } from '../services/newStorageLocationService';
 import { marketService } from '../services/marketService';
 import { gisService } from '../services/gisService';
+import authService from '../services/authService';
 import DataBadge from '../components/DataBadge';
 
 export default function InteractiveMapPage() {
@@ -34,15 +35,20 @@ export default function InteractiveMapPage() {
     markets: null
   });
 
+  const currentUser = authService.getCurrentUser();
+  const isFarmer = currentUser?.role === 'farmer';
+
   const [districts, setDistricts] = useState([]);
   const [selectedDistrict, setSelectedDistrict] = useState('ALL');
   const [selectedCrop, setSelectedCrop] = useState('ALL');
   
-  // Layer toggles
+  // Layer toggles: role-specific defaults (Section 29)
+  // Farmer: focuses on nearby storage & markets
+  // Owner/Planner/Admin: includes deficit zones & expansion hotspots
   const [layers, setLayers] = useState({
     coldStorages: true,
-    gapCircles: true,
-    potentialHotspots: true,
+    gapCircles: !isFarmer,
+    potentialHotspots: !isFarmer,
     markets: true
   });
 
@@ -66,10 +72,9 @@ export default function InteractiveMapPage() {
         maxZoom: 14
       });
 
-      // CartoDB Positron / OpenStreetMap clean tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> & OpenStreetMap contributors',
-        subdomains: 'abcd',
+      // OpenStreetMap clean tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
       }).addTo(map);
 
@@ -95,19 +100,29 @@ export default function InteractiveMapPage() {
     async function loadGisData() {
       setLoading(true);
       try {
-        const [storages, gaps, potentials, mkts, distList] = await Promise.all([
+        const [storages, mkts, distList] = await Promise.all([
           coldStorageService.getColdStorages(),
-          gapAnalysisService.getGapAnalysis(),
-          newStorageLocationService.getPotentialLocations(),
           marketService.getMarkets(),
           gisService.getDistricts()
         ]);
 
         setColdStorages(storages);
-        setGapRecords(gaps.districts || []);
-        setPotentialLocations(potentials.clusters || []);
         setMarkets(mkts);
         setDistricts(distList);
+
+        // Load analytical planning layers if permitted for role
+        if (!isFarmer) {
+          try {
+            const [gaps, potentials] = await Promise.all([
+              gapAnalysisService.getGapAnalysis(),
+              newStorageLocationService.getPotentialLocations()
+            ]);
+            setGapRecords(gaps?.districts || []);
+            setPotentialLocations(potentials?.clusters || []);
+          } catch (e) {
+            console.warn('Analytical planning layers restricted for current role:', e.message);
+          }
+        }
       } catch (err) {
         console.error('Failed to load map data:', err);
       } finally {
@@ -157,20 +172,25 @@ export default function InteractiveMapPage() {
 
         const marker = L.marker([cs.coordinates.lat, cs.coordinates.lng], { icon: customIcon });
         
+        const cropsHtml = cs.commoditiesSupported 
+          ? cs.commoditiesSupported.slice(0, 3).map(c => `<span style="display: inline-block; background: #e2e8f0; color: #334155; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px; margin: 1px;">${c}</span>`).join('') 
+          : '';
+
         marker.bindPopup(`
-          <div style="font-family: inherit; font-size: 12px; width: 240px; padding: 4px;">
+          <div style="font-family: inherit; font-size: 12px; width: 250px; padding: 4px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-size: 10px; font-weight: bold; background: ${isNearFull ? '#fef3c7' : '#d1fae5'}; color: ${isNearFull ? '#92400e' : '#065f46'}; padding: 2px 6px; border-radius: 4px;">
                 ${cs.operatingStatus}
               </span>
               <span style="font-size: 11px; font-weight: bold; color: #047857;">${cs.availableCapacityMT} MT Free</span>
             </div>
-            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 4px;">${cs.facilityName}</strong>
-            <p style="color: #64748b; font-size: 11px; margin: 0 0 6px 0;">${cs.address}</p>
-            <div style="background: #f8fafc; border-radius: 6px; padding: 6px; margin-bottom: 8px; font-size: 11px;">
-              <div><strong>Total Capacity:</strong> ${cs.totalCapacityMT} MT</div>
-              <div><strong>Rent:</strong> ₹${cs.pricingPerMTMonth} / MT / Month</div>
-              <div><strong>Contact:</strong> ${cs.contactPhone}</div>
+            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 2px; line-height: 1.3;">${cs.facilityName}</strong>
+            <p style="color: #64748b; font-size: 10.5px; margin: 0 0 4px 0;">${cs.mandal ? cs.mandal + ', ' : ''}${cs.district} District</p>
+            <div style="margin-bottom: 6px;">${cropsHtml}</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px; margin-bottom: 8px; font-size: 11px; line-height: 1.5;">
+              <div><strong>Capacity:</strong> ${cs.availableCapacityMT} / ${cs.totalCapacityMT} MT</div>
+              <div><strong>Tariff:</strong> ₹${cs.pricingPerMTMonth} / MT / Month</div>
+              <div><strong>Phone:</strong> ${cs.contactPhone}</div>
             </div>
             <a href="/cold-storage/${cs.id}" style="display: block; text-align: center; background: #047857; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 11px;">
               View Facility Details
@@ -227,7 +247,17 @@ export default function InteractiveMapPage() {
     // 3. Render Potential Hotspots Layer (Pulsing Radar Rings)
     potLayer.clearLayers();
     if (layers.potentialHotspots) {
-      potentialLocations.forEach(spot => {
+      let filteredSpots = potentialLocations;
+      if (selectedDistrict !== 'ALL') {
+        filteredSpots = filteredSpots.filter(spot => spot.district.toLowerCase() === selectedDistrict.toLowerCase());
+      }
+      if (selectedCrop !== 'ALL') {
+        filteredSpots = filteredSpots.filter(spot => 
+          spot.primaryTargetCommodities && spot.primaryTargetCommodities.some(c => c.toLowerCase() === selectedCrop.toLowerCase())
+        );
+      }
+
+      filteredSpots.forEach(spot => {
         const potIcon = L.divIcon({
           className: 'custom-radar-marker',
           html: `
@@ -272,7 +302,17 @@ export default function InteractiveMapPage() {
     // 4. Render APMC Mandi Agri Markets Layer
     mktLayer.clearLayers();
     if (layers.markets) {
-      markets.forEach(mkt => {
+      let filteredMkts = markets;
+      if (selectedDistrict !== 'ALL') {
+        filteredMkts = filteredMkts.filter(mkt => mkt.district.toLowerCase() === selectedDistrict.toLowerCase());
+      }
+      if (selectedCrop !== 'ALL') {
+        filteredMkts = filteredMkts.filter(mkt => 
+          mkt.majorCommodities && mkt.majorCommodities.some(c => c.toLowerCase() === selectedCrop.toLowerCase())
+        );
+      }
+
+      filteredMkts.forEach(mkt => {
         const mktIcon = L.divIcon({
           className: 'custom-mkt-marker',
           html: `
@@ -339,11 +379,20 @@ export default function InteractiveMapPage() {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Interactive Andhra Pradesh Cold Storage & Gap Map
+              {currentUser?.role === 'owner' 
+                ? 'Geospatial Cold Storage & Gap Map • Owner Catchment & Expansion' 
+                : 'Interactive Andhra Pradesh Cold Storage & Gap Map'}
             </h1>
+            {currentUser?.role === 'owner' && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                Facility & Expansion View
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real-time geospatial visualization of 26 districts, facility capacities, deficit clusters, and mandi nodes.
+            {currentUser?.role === 'owner'
+              ? 'Visualize cold-chain capacity deficits, nearby horticulture surplus belts, and high-priority zones to identify new facility expansion areas.'
+              : 'Real-time geospatial visualization of 26 districts, facility capacities, deficit clusters, and mandi nodes.'}
           </p>
         </div>
 
@@ -526,10 +575,22 @@ export default function InteractiveMapPage() {
               </div>
 
               <div>
-                <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  {selectedFacility.mandal ? `${selectedFacility.mandal}, ` : ''}{selectedFacility.district}
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 leading-snug mt-1">
                   {selectedFacility.facilityName}
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">{selectedFacility.address}</p>
+                {selectedFacility.commoditiesSupported && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {selectedFacility.commoditiesSupported.map(c => (
+                      <span key={c} className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs p-2.5 bg-slate-50 rounded-xl">
@@ -538,14 +599,22 @@ export default function InteractiveMapPage() {
                   <p className="font-bold text-emerald-700">{selectedFacility.availableCapacityMT} MT</p>
                 </div>
                 <div>
+                  <span className="text-[10px] text-slate-400">Total:</span>
+                  <p className="font-bold text-slate-800">{selectedFacility.totalCapacityMT} MT</p>
+                </div>
+                <div>
                   <span className="text-[10px] text-slate-400">Rate:</span>
                   <p className="font-bold text-slate-800">₹{selectedFacility.pricingPerMTMonth} / MT</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400">Contact:</span>
+                  <p className="font-bold text-slate-800 truncate">{selectedFacility.contactPhone}</p>
                 </div>
               </div>
 
               <Link
                 to={`/cold-storage/${selectedFacility.id}`}
-                className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold text-center block"
+                className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold text-center block transition-colors"
               >
                 Open Facility Details
               </Link>
